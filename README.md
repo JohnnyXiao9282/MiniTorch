@@ -50,7 +50,3 @@ MiniTorch
 pip install pytest
 python -m pytest tests/ -v
 ```
-
-## Status
-
-Work in progress. `Value` supports addition and multiplication with backpropagation. More operations are next.
