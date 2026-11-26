@@ -1,93 +1,111 @@
 """Scalar Value with reverse-mode automatic differentiation.
 
-Your task: implement the TODO methods. Each operation should build a
-computational graph by recording its children (`_prev`) and a local
-backward function (`_backward`) that accumulates gradients into them.
+Rule: no inner functions. Each operation records its inputs (`inputs`)
+and op name (`_op`). The method `_backward()` looks at `_op` and applies
+the matching gradient rule to the children.
 """
 
 
 class Value:
-  """A scalar that tracks its data, gradient, and the graph that produced it."""
+    """A scalar that tracks its data, gradient, and the graph that produced it."""
 
-  def __init__(self, data, _children=(), _op="", label=""):
-    self.data = float(data)
-    self.grad = 0.0
-    # TODO: store the children as a set/tuple, the op name, and a label.
-    self._prev = set(_children)
-    self._op = _op
-    self.label = label
-    # TODO: default _backward to a no-op function (lambda: None).
-    self._backward = lambda: None
+    def __init__(self, data, _children=(), _op="", label=""):
+        self.data = float(data)
+        self.grad = 0.0
+        # A tuple (not a set) so that x + x keeps both children.
+        self.inputs = tuple(_children)
+        self._op = _op
+        self.label = label
 
-  def __repr__(self):
-    return f"Value(data={self.data}, grad={self.grad})"
+    def __repr__(self):
+        return f"Value(data={self.data}, grad={self.grad})"
 
-  # ---- Arithmetic operators (forward pass + local backward) ----
+    # ---- Backward rule for ONE node (called by backward()) ----
 
-  def __add__(self, other):
-    # TODO: wrap `other` in Value if needed, compute out = self + other,
-    # define out._backward that does: self.grad += 1 * out.grad, etc.
-    # Hint: use a closure. Think about why `+=` (not `=`) is required.
-    raise NotImplementedError
+    def _backward(self):
+        if self._op == "+":
+            for i in self.inputs:
+                i.grad += self.grad
+        elif self._op == "*":
+            x, y = self.inputs
+            x.grad += self.grad * y.data
+            y.grad += self.grad * x.data
+                
+            
 
-  def __mul__(self, other):
-    # TODO: product rule. d(a*b)/da = b, d(a*b)/db = a.
-    raise NotImplementedError
+    def __add__(self, other):    
+        if not isinstance(other, Value):
+            other = Value(other)
+        return Value(self.data + other.data, (self, other), "+")
+            
+        
+    def __mul__(self, other):
+        if not isinstance(other, Value):
+            other = Value(other)
+        return Value(self.data * other.data, (self, other), "*")
 
-  def __pow__(self, exponent):
-    # TODO: only int/float exponents. d(x^n)/dx = n * x^(n-1).
-    raise NotImplementedError
+    def __pow__(self, exponent):
+        # TODO: only int/float exponents. d(x^n)/dx = n * x^(n-1).
+        raise NotImplementedError
 
-  def __neg__(self):
-    # TODO: return self * -1
-    raise NotImplementedError
+    def __neg__(self):
+        # TODO: return self * -1
+        raise NotImplementedError
 
-  def __sub__(self, other):
-    # TODO: return self + (-other)
-    raise NotImplementedError
+    def __sub__(self, other):
+        # TODO: return self + (-other)
+        raise NotImplementedError
 
-  def __truediv__(self, other):
-    # TODO: return self * other**-1
-    raise NotImplementedError
+    def __truediv__(self, other):
+        # TODO: return self * other**-1
+        raise NotImplementedError
 
-  # Reflected operators so that `2 + v` and `2 * v` work.
-  def __radd__(self, other):
-    return self + other
+    # Reflected operators so that `2 + v` and `2 * v` work.
+    def __radd__(self, other):
+        return self + other
 
-  def __rmul__(self, other):
-    return self * other
+    def __rmul__(self, other):
+        return self * other
 
-  def __rsub__(self, other):
-    # TODO: other - self
-    raise NotImplementedError
+    def __rsub__(self, other):
+        # TODO: other - self
+        raise NotImplementedError
 
-  def __rtruediv__(self, other):
-    # TODO: other / self
-    raise NotImplementedError
+    def __rtruediv__(self, other):
+        # TODO: other / self
+        raise NotImplementedError
 
-  # ---- Activation / math functions ----
+    # ---- Activation / math functions ----
 
-  def exp(self):
-    # TODO: d(e^x)/dx = e^x
-    raise NotImplementedError
+    def exp(self):
+        # TODO: d(e^x)/dx = e^x
+        raise NotImplementedError
 
-  def log(self):
-    # TODO: d(ln x)/dx = 1/x
-    raise NotImplementedError
+    def log(self):
+        # TODO: d(ln x)/dx = 1/x
+        raise NotImplementedError
 
-  def tanh(self):
-    # TODO: d(tanh x)/dx = 1 - tanh(x)^2. Reuse the output `t`.
-    raise NotImplementedError
+    def tanh(self):
+    
 
-  def relu(self):
-    # TODO: d(relu x)/dx = 1 if x > 0 else 0
-    raise NotImplementedError
+    def relu(self):
+       
 
-  # ---- Autograd ----
+    # ---- Autograd ----
+    def collect_nodes(self, visited, nodes):
+        if self in visited:
+            return 
+        else:
+            visited.add(self)
+            for i in self.inputs:
+                i.collect_nodes(visited, nodes)
+            nodes.append(self)
 
-  def backward(self):
-    # TODO:
-    # 1. Build a topological order of all nodes reachable from self (DFS).
-    # 2. Set self.grad = 1.0 (seed).
-    # 3. Walk the order in reverse and call each node's _backward().
-    raise NotImplementedError
+    def backward(self):
+        nodes = []
+        visited = set()
+        self.collect_nodes(visited, nodes)
+        self.grad = 1.0
+        
+        for node in reversed(nodes):
+            node._backward()
