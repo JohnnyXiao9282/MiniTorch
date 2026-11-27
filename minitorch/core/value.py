@@ -38,10 +38,7 @@ class Value:
         elif self._op == "relu":
             x = self.inputs[0]
             x.grad += (self.data > 0) * self.grad
-            
-        
-                
-            
+                   
 
     def __add__(self, other):    
         if not isinstance(other, Value):
