@@ -66,12 +66,14 @@ class Value:
         return self * other
 
     def __rsub__(self, other):
-        # TODO: other - self
-        raise NotImplementedError
+        if not isinstance(other, Value):
+            other = Value(other)
+        return other + (-self)
 
     def __rtruediv__(self, other):
-        # TODO: other / self
-        raise NotImplementedError
+        if not isinstance(other, Value):
+            other = Value(other)
+        return other * self ** -1
 
     # ---- Activation / math functions ----
 
