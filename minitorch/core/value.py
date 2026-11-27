@@ -30,6 +30,9 @@ class Value:
             x, y = self.inputs
             x.grad += self.grad * y.data
             y.grad += self.grad * x.data
+        elif self._op == "**":
+            x = self.inputs[0]
+            x.grad += self.exponent * x.data ** (self.exponent - 1) * self.grad
                 
             
 
@@ -45,20 +48,23 @@ class Value:
         return Value(self.data * other.data, (self, other), "*")
 
     def __pow__(self, exponent):
-        # TODO: only int/float exponents. d(x^n)/dx = n * x^(n-1).
-        raise NotImplementedError
+        result = Value(self.data ** exponent, (self,), "**")
+        result.exponent = exponent
+        return result
 
     def __neg__(self):
-        # TODO: return self * -1
-        raise NotImplementedError
+        return self * -1
+        
 
     def __sub__(self, other):
-        # TODO: return self + (-other)
-        raise NotImplementedError
+        if not isinstance(other, Value):
+            other = Value(other)
+        return self + (-other)
 
     def __truediv__(self, other):
-        # TODO: return self * other**-1
-        raise NotImplementedError
+        if not isinstance(other, Value):
+            other = Value(other)
+        return self * other ** -1
 
     # Reflected operators so that `2 + v` and `2 * v` work.
     def __radd__(self, other):
