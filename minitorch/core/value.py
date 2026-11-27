@@ -66,10 +66,14 @@ class Value:
         return self * other ** -1
 
     # Reflected operators so that `2 + v` and `2 * v` work.
-    def __radd__(self, other):
+    def __radd__(self, other):  
+        if not isinstance(other, Value):
+            other = Value(other)
         return self + other
 
     def __rmul__(self, other):
+        if not isinstance(other, Value):
+            other = Value(other)
         return self * other
 
     def __rsub__(self, other):
