@@ -1,11 +1,3 @@
-"""Scalar Value with reverse-mode automatic differentiation.
-
-Rule: no inner functions. Each operation records its inputs (`inputs`)
-and op name (`_op`). The method `_backward()` looks at `_op` and applies
-the matching gradient rule to the children.
-"""
-
-
 class Value:
     """A scalar that tracks its data, gradient, and the graph that produced it."""
 
