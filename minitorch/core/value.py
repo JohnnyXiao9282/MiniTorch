@@ -4,7 +4,6 @@ class Value:
     def __init__(self, data, _children=(), _op="", label=""):
         self.data = float(data)
         self.grad = 0.0
-        # A tuple (not a set) so that x + x keeps both children.
         self.inputs = tuple(_children)
         self._op = _op
         self.label = label
