@@ -1,3 +1,5 @@
+import math
+
 class Value:
     """A scalar that tracks its data, gradient, and the graph that produced it."""
 
@@ -30,6 +32,12 @@ class Value:
         elif self._op == "log":
             x = self.inputs[0]
             x.grad += (1 / x.data) * self.grad
+        elif self._op == "tanh":
+            x = self.inputs[0]
+            x.grad += (1 - self.data ** 2) * self.grad
+        elif self._op == "relu":
+            x = self.inputs[0]
+            x.grad += (self.data > 0) * self.grad
             
         
                 
@@ -96,9 +104,12 @@ class Value:
         
 
     def tanh(self):
+        return Value(math.tanh(self.data), (self,), "tanh")
     
 
     def relu(self):
+        return Value(max(0, self.data), (self,), "relu")
+        
        
 
     # ---- Autograd ----
