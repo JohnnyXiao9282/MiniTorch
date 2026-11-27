@@ -25,6 +25,14 @@ class Value:
         elif self._op == "**":
             x = self.inputs[0]
             x.grad += self.exponent * x.data ** (self.exponent - 1) * self.grad
+        elif self._op == "exp":
+            x = self.inputs[0]
+            x.grad += self.data * self.grad
+        elif self._op == "log":
+            x = self.inputs[0]
+            x.grad += (1 / x.data) * self.grad
+            
+        
                 
             
 
@@ -78,12 +86,11 @@ class Value:
     # ---- Activation / math functions ----
 
     def exp(self):
-        # TODO: d(e^x)/dx = e^x
-        raise NotImplementedError
-
+        return Value(math.exp(self.data), (self,), "exp")
+    
     def log(self):
-        # TODO: d(ln x)/dx = 1/x
-        raise NotImplementedError
+        return Value(math.log(self.data), (self,), "log")
+        
 
     def tanh(self):
     
