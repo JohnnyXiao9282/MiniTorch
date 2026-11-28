@@ -6,9 +6,9 @@ class Neuron:
         self.bias = Value(0)
         self.weights = [Value(random.uniform(-1, 1)) for i in range(num_inputs)]
         
-    def __call__(self, inputs):
+    def __call__(self, data):
         output = Value(0)
-        for w, x in zip(self.weights, inputs):
+        for w, x in zip(self.weights, data):
             output += w * x
         output += self.bias
         return output.tanh()
